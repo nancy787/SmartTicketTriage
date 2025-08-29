@@ -24,10 +24,6 @@ return new class extends Migration
             $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
             $table->foreignId('category_id')->nullable()->constrained('ticket_categories')->nullOnDelete();
             $table->text('note')->nullable();
-            $table->string('ai_provider')->nullable();
-            $table->string('ai_model')->nullable();
-            $table->unsignedTinyInteger('ai_confidence')->nullable();
-            $table->timestamp('classified_at')->nullable();
             $table->timestamps();
         });
     }

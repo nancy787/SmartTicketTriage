@@ -15,10 +15,31 @@ class TicketController extends Controller
 
     public function index(Request $request) {
         try {
-            $page = $request->page ?? env('page', 10);
-            $listTickets = $this->ticket->orderBy('created_at', 'desc')
-                                        ->get();
-                                        // ->paginate($page);
+            $perPage = $request->get('per_page', 10);  
+
+            $query = $this->ticket->with('category')
+                                        ->orderBy('created_at', 'desc');
+
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('subject', 'like', "%{$search}%")
+                        ->orWhere('body', 'like', "%{$search}%");
+                });
+            }
+
+            // Status Filter
+            if ($request->has('status') && !empty($request->status)) {
+                $query->where('status', $request->status);
+            }
+
+            // Category Filter
+            if ($request->has('category_id') && !empty($request->category_id)) {
+                $query->where('category_id', $request->category_id);
+            }
+            
+            $listTickets = $query->paginate($perPage);
+
             return response()->json([
                 'listTickets' => $listTickets,
             ]);
@@ -64,7 +85,7 @@ class TicketController extends Controller
 
     public function ticketDetails($id) {
         try {
-            $ticket = $this->ticket->find($id);
+            $ticket = $this->ticket->with('category')->find($id);
             if(!$ticket) {
                 return response()->json([
                     'success' => false,
@@ -88,9 +109,9 @@ class TicketController extends Controller
     public function update($id, Request $request) {
         try {
             $validated = $request->validate([
-                'status'  => 'sometimes|in:open,in_progress,resolved,closed',
+                'status'      => 'sometimes|in:open,in_progress,resolved,closed',
                 'category_id' => 'nullable|exists:categories,id',
-                'note'    => 'nullable|string',
+                'note'        => 'nullable|string',
             ]);
 
             $ticket = $this->ticket->find($id);

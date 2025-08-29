@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ai_jobs', function (Blueprint $table) {
+        Schema::create('ticket_classification_jobs', function (Blueprint $table) {
             $table->id();
-            $table->string('ai_provider')->nullable();
-            $table->string('ai_model')->nullable();
-            $table->unsignedTinyInteger('ai_confidence')->nullable();
-            $table->timestamp('classified_at')->nullable();
+            $table->enum('status', ['pending', 'processing', 'completed, failed']);
+            $table->json('response')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ai_jobs');
+        Schema::dropIfExists('ticket_classification_jobs');
     }
 };

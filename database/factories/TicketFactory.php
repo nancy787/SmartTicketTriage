@@ -21,7 +21,7 @@ class TicketFactory extends Factory
         $statuses = ['open', 'in_progress', 'resolved', 'closed'];
         return [
             'subject'     => $this->faker->sentence(5),
-            'body'        => $this->faker->paragraph(3),
+            'body'        => $this->faker->paragraph(1),
             'note'       => $this->faker->sentences(rand(1, 3), true),
             'status'      => $this->faker->randomElement($statuses),
             'category_id' => rand(1, 5)

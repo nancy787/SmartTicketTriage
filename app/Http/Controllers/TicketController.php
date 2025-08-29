@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Ticket;
+use App\Models\Category;
+use App\Jobs\ClassifyTicketJob;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class TicketController extends Controller
 {
@@ -131,5 +134,36 @@ class TicketController extends Controller
                 'error'   => $e->getMessage()
             ]);
         }
+    }
+
+    public function classify(Ticket $ticket)
+    {
+        dispatch(new ClassifyTicketJob($ticket));
+        return response()->json(['message' => 'Classification job queued']);
+    }
+
+    public function getCategories(){
+        try {
+            $categories = Category::get();
+            return response()->json([
+                'categories' => $categories
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => $e->getMessage()
+            ]);
+        }
+    }
+    public function TestOpenAi(){
+        $response = OpenAI::chat()->create([
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are a helpful assistant.'],
+                ['role' => 'user', 'content' => 'Hello, who won the world series in 2020?'],
+            ],
+        ]);
+    
+        return $response->choices[0]->message->content;
     }
 }

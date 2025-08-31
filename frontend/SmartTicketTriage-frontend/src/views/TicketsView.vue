@@ -52,7 +52,14 @@
               </span>
             </td>
             <td>
-              <span v-if="ticket.body" class="tickets__badge">📝</span>
+              <span
+                v-if="ticket.body"
+                class="tickets__badge cursor-pointer"
+                @click="openModal(ticket)"
+              >
+                📝
+              </span>
+              
             </td>
             <td>
               <button 
@@ -68,7 +75,15 @@
         </tbody>
       </table>
     </div>
-
+    <div v-if="showModalNotes" class="tickets__modal">
+      <div class="tickets__modal-content">
+        <h2 class="tickets__modal-title">Notes</h2>
+          <p>{{ ticketNotes }}</p>
+        <div class="tickets__modal-actions">
+          <button class="tickets__modal-btn tickets__modal-btn--cancel" @click="closeModal">Close</button>
+        </div>
+      </div>
+    </div>
     <!-- Modal -->
     <div v-if="showModal" class="tickets__modal">
       <div class="tickets__modal-content">
@@ -117,6 +132,9 @@ onMounted(async () => {
 const selectedCategory = ref('')
 const searchText = ref('')
 const showModal = ref(false)
+const showModalNotes = ref(false)
+const ticketNotes = ref('')
+
 const newTicket = ref({
   subject: '',
   body: '',
@@ -147,6 +165,15 @@ const addTicket = async() => {
 const updateCategory = async(ticket) => {
   await ticketStore.updateTicket(ticket.id, { category_id: ticket.category_id });
   await ticketStore.fetchTickets()
+}
+
+const openModal = (ticket) => {
+  ticketNotes.value = ticket.body
+  showModalNotes.value = true
+}
+
+const closeModal = () => {
+  showModalNotes.value = false
 }
 
 </script>

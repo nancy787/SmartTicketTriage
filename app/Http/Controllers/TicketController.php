@@ -134,9 +134,10 @@ class TicketController extends Controller
         }
     }
 
-    public function classify(Ticket $ticket)
+    public function classify($id)
     {
         try {
+            $ticket = Ticket::find($id);
             dispatch(new ClassifyTicketJob($ticket));
             return response()->json(['message' => 'Classification job queued']);
         } catch (\Exception $e) {

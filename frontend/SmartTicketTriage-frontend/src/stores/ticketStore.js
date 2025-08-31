@@ -77,6 +77,16 @@ export const useTicketStore = defineStore("ticket", {
       } catch (err) {
         console.error("Failed to update ticket:", err);
       }
+    },
+
+    classifyTicket(id) {
+      try {
+        const res = api.post(`/tickets/${id}/classify`);
+        const index = this.tickets.findIndex(t => t.id === id);
+        if (index !== -1) this.tickets[index] = res.data;
+      } catch (err) {
+        console.error("Failed to update ticket:", err);
+      }
     }
   },
 });

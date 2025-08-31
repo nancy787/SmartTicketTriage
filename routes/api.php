@@ -13,7 +13,7 @@ Route::prefix('tickets')->group(function () {
     Route::post('create', [TicketController::class, 'store']);
     Route::get('{id}', [TicketController::class, 'ticketDetails']);
     Route::patch('update/{id}', [TicketController::class, 'update']);
-    Route::post('{ticket}/classify', [TicketController::class, 'classify']);
+    Route::post('{id}/classify', [TicketController::class, 'classify']);
 });
 
 Route::get('categories', [TicketController::class, 'getCategories']);

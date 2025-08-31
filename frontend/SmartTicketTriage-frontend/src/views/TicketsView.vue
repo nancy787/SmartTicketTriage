@@ -176,6 +176,11 @@ const closeModal = () => {
   showModalNotes.value = false
 }
 
+const classify = (ticket) => {
+  ticketStore.classifyTicket(ticket.id);
+}
+
+
 </script>
 
 

@@ -12,7 +12,7 @@ class Ticket extends Model
 
     protected $fillable = [
         'subject','body','status','categor_id','note',
-        'ai_provider','ai_model','ai_confidence','classified_at',
+        'ai_provider','ai_explanation','ai_confidence','classified_at',
         ];
     
     protected $attributes = [

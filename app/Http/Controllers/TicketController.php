@@ -138,8 +138,15 @@ class TicketController extends Controller
 
     public function classify(Ticket $ticket)
     {
-        dispatch(new ClassifyTicketJob($ticket));
-        return response()->json(['message' => 'Classification job queued']);
+        try {
+            dispatch(new ClassifyTicketJob($ticket));
+            return response()->json(['message' => 'Classification job queued']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => $e->getMessage()
+            ]);
+        }
     }
 
     public function getCategories(){
@@ -156,14 +163,11 @@ class TicketController extends Controller
         }
     }
     public function TestOpenAi(){
-        $response = OpenAI::chat()->create([
-            'model' => 'gpt-3.5-turbo',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are a helpful assistant.'],
-                ['role' => 'user', 'content' => 'Hello, who won the world series in 2020?'],
-            ],
+        $response = OpenAI::responses()->create([
+            'model' => 'gpt-5',
+            'input' => 'Hello!',
         ]);
-    
-        return $response->choices[0]->message->content;
+        
+        return $response->outputText;
     }
 }

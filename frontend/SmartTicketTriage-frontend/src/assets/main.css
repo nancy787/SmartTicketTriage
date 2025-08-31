@@ -1,0 +1,50 @@
+@import './base.css';
+
+/* Reset layout */
+html, body, #app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* App wrapper */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;   /* full screen */
+  width: 100%;
+  font-weight: normal;
+  max-width: none;     /* remove 1280px restriction */
+  padding: 0;          /* remove forced padding */
+}
+
+/* Links */
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+/* REMOVE this (causes centering bug) */
+/*
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+  }
+}
+ */

@@ -23,6 +23,9 @@ return new class extends Migration
             $table->string('body')->nullable()->comment('details of ticket');
             $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
             $table->foreignId('category_id')->nullable()->constrained('ticket_categories')->nullOnDelete();
+            $table->string('ai_explanation')->nullable();
+            $table->string('ai_confidence')->nullable();
+            $table->timestamp('classified_at')->nullable();
             $table->text('note')->nullable();
             $table->timestamps();
         });

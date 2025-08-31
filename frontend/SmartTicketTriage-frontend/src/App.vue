@@ -1,6 +1,8 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import { ref, watch } from 'vue'
+import Loader from "../src/components/Loader.vue";
+
 
 // Theme state
 const darkMode = ref(false)
@@ -34,6 +36,7 @@ watch(darkMode, (val) => {
 
     <!-- Main Content -->
     <main class="app-main">
+      <Loader />
       <RouterView />
     </main>
 

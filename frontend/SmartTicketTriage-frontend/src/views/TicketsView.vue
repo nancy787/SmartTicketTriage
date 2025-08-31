@@ -9,7 +9,7 @@
     <div class="tickets__filters">
       <select v-model="selectedCategory" class="tickets__filter-select">
         <option value="">All Categories</option>
-        <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+        <option v-for="cat in categories" :key="cat" :value="cat.name">{{ cat.name }}</option>
       </select>
 
       <input 
@@ -33,16 +33,18 @@
         <tbody>
           <tr v-for="ticket in filteredTickets" :key="ticket.id">
             <td>{{ ticket.subject }}</td>
-           <td>
-            <select v-model="ticket.category_id">
-            <option 
-              v-for="category in categories" 
-              :key="category.id" 
-              :value="category.id"
-            >
-              {{ category.name }}
-            </option>
-          </select>
+            <td>
+              <select 
+                class="tickets__category-select"
+                v-model="ticket.category_id"
+                @change="updateCategory(ticket)"
+              >
+                <option disabled value="">-- Select Category --</option>
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                  {{ cat.name }}
+                </option>
+              </select>
+
             </td>
             <td>
               <span class="tickets__confidence">
@@ -76,6 +78,12 @@
           placeholder="Subject" 
           class="tickets__modal-input" 
         />
+        <select v-model="newTicket.category_id" class="tickets__category-select">
+          <option disabled value="">-- Select Category --</option>
+          <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+            {{ cat.name }}
+          </option>
+        </select>
         <textarea 
           v-model="newTicket.body" 
           placeholder="Body" 
@@ -97,49 +105,48 @@ import { storeToRefs } from 'pinia'
 import { useTicketStore } from "../stores/ticketStore";
 
 const ticketStore = useTicketStore()
-const { tickets, loading, error } = storeToRefs(ticketStore) // <-- reactive refs
-const { tickets, categories, loading, error } = storeToRefs(ticketStore) 
+const { tickets, loading, error } = storeToRefs(ticketStore)
+const { categories } = storeToRefs(ticketStore);
+
 
 onMounted(async () => {
-  await ticketStore.fetchTickets()     // load tickets
-  await ticketStore.getCategories()    // load categories
+  await ticketStore.fetchCategories();
+  await ticketStore.fetchTickets();
 })
 
-const categories = ref([])
 const selectedCategory = ref('')
 const searchText = ref('')
 const showModal = ref(false)
 const newTicket = ref({
   subject: '',
   body: '',
-  category: 'Support',
+  category_id: '',
   confidence: 0.5
 })
+
 
 // Filters
 const filteredTickets = computed(() => {
   return tickets.value.filter(ticket => {
     return (
-      (selectedCategory.value === '' || ticket.category === selectedCategory.value) &&
+      (selectedCategory.value === '' || ticket.category.name === selectedCategory.value) &&
       (searchText.value === '' || ticket.subject.toLowerCase().includes(searchText.value.toLowerCase()))
     )
   })
 })
 
-// Fake classifier
-function classify(ticket) {
-  ticket.loading = true
-  setTimeout(() => {
-    ticket.confidence = Math.random().toFixed(2)
-    ticket.loading = false
-  }, 1500)
-}
 
 // Add ticket
-async function addTicket() {
+const addTicket = async() => {
   await ticketStore.addTicket(newTicket.value)
   showModal.value = false
-  newTicket.value = { subject: '', body: '', category: 'Support', confidence: 0.5 }
+  await ticketStore.fetchTickets()
+  newTicket.value = {}
+}
+
+const updateCategory = async(ticket) => {
+  await ticketStore.updateTicket(ticket.id, { category_id: ticket.category_id });
+  await ticketStore.fetchTickets()
 }
 
 </script>
@@ -335,6 +342,33 @@ body.dark .tickets__modal-content {
 
 body.dark .tickets__modal-btn--cancel {
   background: #444;
+  color: #eee;
+}
+
+/* Common Select Style */
+.tickets__category-select,
+.tickets__filter-select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.tickets__category-select:focus,
+.tickets__filter-select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Dark theme support */
+body.dark .tickets__category-select,
+body.dark .tickets__filter-select {
+  background: #2a2a2a;
+  border: 1px solid #444;
   color: #eee;
 }
 

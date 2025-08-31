@@ -2,17 +2,9 @@
   <div class="dashboard">
     <!-- Counters -->
     <div class="dashboard__counters">
-      <div class="counter-card counter-card--open">
-        <h3 class="counter-card__title">Open Tickets</h3>
+      <div v-for="category in categories" :class="['counter-card', `counter-card--${category.name}`]">
+        <h3 class="counter-card__title">{{ formatCategoryName(category.name) }}</h3>
         <p class="counter-card__value">12</p>
-      </div>
-      <div class="counter-card counter-card--closed">
-        <h3 class="counter-card__title">Closed Tickets</h3>
-        <p class="counter-card__value">5</p>
-      </div>
-      <div class="counter-card counter-card--pending">
-        <h3 class="counter-card__title">Pending</h3>
-        <p class="counter-card__value">7</p>
       </div>
     </div>
 
@@ -26,7 +18,18 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import Chart from 'chart.js/auto'
+import { useTicketStore } from "../stores/ticketStore";
+
+const ticketStore = useTicketStore()
+const { categories } = storeToRefs(ticketStore);
+const { tickets, loading, error } = storeToRefs(ticketStore)
+
+onMounted(async () => {
+  await ticketStore.fetchCategories();
+  await ticketStore.fetchTickets();
+})
 
 
 onMounted(() => {
@@ -37,7 +40,7 @@ onMounted(() => {
       labels: ['Open', 'Closed', 'Pending'],
       datasets: [{
         label: 'Tickets',
-        data: [12, 15, 7],
+        data: [12, 15, 7, 12, 15, 7],
         backgroundColor: ['#3498db', '#2ecc71', '#f39c12']
       }]
     },
@@ -49,6 +52,14 @@ onMounted(() => {
     }
   })
 })
+const formatCategoryName = (name) => {
+  if (!name) return "";
+  return name
+    .split("_")                   // split on underscore
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize
+    .join(" ");                   // join with space
+}
+
 </script>
 
 <style>
@@ -91,13 +102,22 @@ onMounted(() => {
   font-weight: bold;
 }
 
-.counter-card--open {
+.counter-card--billing {
   border-left: 5px solid #3498db;
 }
-.counter-card--closed {
+.counter-card--technical {
   border-left: 5px solid #2ecc71;
 }
-.counter-card--pending {
+.counter-card--account {
+  border-left: 5px solid #f39c12;
+}
+.counter-card--bug {
+  border-left: 5px solid #2112f3;
+}
+.counter-card--feature_request {
+  border-left: 5px solid #e012f3;
+}
+.counter-card--other {
   border-left: 5px solid #f39c12;
 }
 

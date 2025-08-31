@@ -11,7 +11,7 @@ class Ticket extends Model
     use HasFactory, HasUlids;
 
     protected $fillable = [
-        'subject','body','status','categor_id','note',
+        'subject','body','status','category_id','note',
         'ai_provider','ai_explanation','ai_confidence','classified_at',
         ];
     

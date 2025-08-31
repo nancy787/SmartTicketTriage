@@ -34,3 +34,11 @@ php artisan queue:work
 
 9. **Start queue worker**
 php artisan serve
+
+
+10. **For Frontend**
+go to path 
+/SmartTicketTriage/frontend/SmartTicketTriage-frontend
+run the following command
+npm install
+npm run dev

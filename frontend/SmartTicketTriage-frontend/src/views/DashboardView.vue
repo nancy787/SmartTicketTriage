@@ -2,17 +2,9 @@
   <div class="dashboard">
     <!-- Counters -->
     <div class="dashboard__counters">
-      <div class="counter-card counter-card--open">
-        <h3 class="counter-card__title">Open Tickets</h3>
-        <p class="counter-card__value">12</p>
-      </div>
-      <div class="counter-card counter-card--closed">
-        <h3 class="counter-card__title">Closed Tickets</h3>
-        <p class="counter-card__value">5</p>
-      </div>
-      <div class="counter-card counter-card--pending">
-        <h3 class="counter-card__title">Pending</h3>
-        <p class="counter-card__value">7</p>
+      <div v-for="cat in ticketCounts" :key="cat.id" :class="['counter-card', `counter-card--${cat.name}`]">
+        <h3 class="counter-card__title">{{ formatCategoryName(cat.name) }}</h3>
+        <p class="counter-card__value">{{ cat.count }}</p>
       </div>
     </div>
 
@@ -25,30 +17,70 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch, computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import Chart from 'chart.js/auto'
+import { useTicketStore } from "../stores/ticketStore";
 
+const ticketStore = useTicketStore()
+const { categories, tickets } = storeToRefs(ticketStore)
 
-onMounted(() => {
+let chartInstance = null
+
+// Fetch data
+onMounted(async () => {
+  await ticketStore.fetchCategories();
+  await ticketStore.fetchTickets();
+})
+
+// Compute ticket counts grouped by category
+const ticketCounts = computed(() => {
+  if (!categories.value.length || !tickets.value) return []
+
+  return categories.value.map(cat => {
+    const count = tickets.value.filter(
+      t => t.category_id === cat.id
+    ).length
+    return { id: cat.id, name: cat.name, count }
+  })
+})
+
+// Update Chart when ticketCounts changes
+watch(ticketCounts, (counts) => {
+  if (!counts.length) return
   const ctx = document.getElementById('chart')
-  new Chart(ctx, {
+
+  // Destroy old chart before re-creating
+  if (chartInstance) chartInstance.destroy()
+
+  chartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Open', 'Closed', 'Pending'],
+      labels: counts.map(c => formatCategoryName(c.name)), // category names
       datasets: [{
         label: 'Tickets',
-        data: [12, 15, 7],
-        backgroundColor: ['#3498db', '#2ecc71', '#f39c12']
+        data: counts.map(c => c.count), // ticket counts
+        backgroundColor: [
+          '#3498db', '#2ecc71', '#f39c12',
+          '#9b59b6', '#e74c3c', '#1abc9c'
+        ]
       }]
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: { display: false }
-      }
+      plugins: { legend: { display: false } }
     }
   })
 })
+
+// Format category names (remove underscores + capitalize)
+const formatCategoryName = (name) => {
+  if (!name) return ""
+  return name
+    .split("_")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
 </script>
 
 <style>
@@ -91,14 +123,23 @@ onMounted(() => {
   font-weight: bold;
 }
 
-.counter-card--open {
+.counter-card--billing {
   border-left: 5px solid #3498db;
 }
-.counter-card--closed {
+.counter-card--technical {
   border-left: 5px solid #2ecc71;
 }
-.counter-card--pending {
+.counter-card--account {
   border-left: 5px solid #f39c12;
+}
+.counter-card--bug {
+  border-left: 5px solid #9b59b6;
+}
+.counter-card--feature_request {
+  border-left: 5px solid #e74c3c;
+}
+.counter-card--other {
+  border-left: 5px solid #1abc9c;
 }
 
 /* Chart Section */

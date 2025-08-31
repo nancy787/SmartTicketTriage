@@ -10,6 +10,12 @@ export const useTicketStore = defineStore("ticket", {
   }),
 
   actions: {
+    showLoader() {
+      this.loading = true;
+    },
+    hideLoader() {
+      this.loading = false;
+    },
     async fetchTickets() {
         this.loading = true;
         this.error = null;
@@ -22,7 +28,6 @@ export const useTicketStore = defineStore("ticket", {
             this.loading = false;
         }
     },
-
 
     async addTicket(newTicket) {
       try {
@@ -52,12 +57,25 @@ export const useTicketStore = defineStore("ticket", {
       }
     },
 
-    async getCategories() {
+    async fetchCategories() {
       try {
-        await api.get(`/categories`);
-        categories.value = response.data.categories
+        const response = await api.get(`/categories`);
+        this.categories = response.data.categories.map(cat => ({
+          id: cat.id,
+          name: cat.name
+        }));
       } catch (err) {
         console.error("Failed to get categories:", err);
+      }
+    },
+
+    async updateTicket(id, updatedTicket) {
+      try {
+        const res = await api.patch(`/tickets/update/${id}`, updatedTicket);
+        const index = this.tickets.findIndex(t => t.id === id);
+        if (index !== -1) this.tickets[index] = res.data;
+      } catch (err) {
+        console.error("Failed to update ticket:", err);
       }
     }
   },

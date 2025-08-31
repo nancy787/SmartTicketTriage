@@ -60,7 +60,7 @@ class TicketController extends Controller
                 'subject'     => 'required|max:255',
                 'body'        => 'required|string',
                 'status'      => 'sometimes|in:open,in_progress,resolved,closed',
-                'category_id' => 'nullable|exists:categories,id',
+                'category_id' => 'nullable|exists:ticket_categories,id',
                 'note'        => 'nullable|string',
             ]);
 
@@ -112,9 +112,7 @@ class TicketController extends Controller
     public function update($id, Request $request) {
         try {
             $validated = $request->validate([
-                'status'      => 'sometimes|in:open,in_progress,resolved,closed',
-                'category_id' => 'nullable|exists:categories,id',
-                'note'        => 'nullable|string',
+                'category_id' => 'nullable|exists:ticket_categories,id',
             ]);
 
             $ticket = $this->ticket->find($id);
